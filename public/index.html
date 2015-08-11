@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <title>My Skill Sharing</title>
+    <link rel="stylesheet" type="text/css" href="myskillsharing.css">
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <body>
+        <h1 class="jumbotron">My Skill Sharing</h1>
+        <p>Your name: <input type="text" id="name"></p>
+        <form id="newtalk" action="">
+            <h3>Submit a talk</h3>
+            Title: <input type="text" style="width: 40em" name="title">
+            <br>
+            Summary: <input type="text" style="width: 40em" name="summary">
+            <button type="submit" class="btn-info">Send</button>
+        </form>
+        <br/>
+        <div id="talks"></div>
+        <div id="template" style="display: none">
+            <div class="talk well">
+                <h2 class="lead">{{title}}</h2>
+                <div>by <span class="name">{{presenter}}</span></div>
+                <p>{{summary}}</p>
+                <div class="comments"></div>
+                <form action="">
+                    <input type="text" name="comment">
+                    <button type="submit" class="btn-success">Add comment</button>
+                    <button type="button" class="del btn-danger">Delete talk</button>
+                </form>
+            </div>
+            <div class="comment">
+                <span class="name">{{author}}</span>: {{message}}
+            </div>
+        </div>
+    <script type="text/javascript" src="myskillsharing_client.js"></script>
+    </body>
+</html>
