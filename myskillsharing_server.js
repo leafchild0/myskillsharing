@@ -118,7 +118,6 @@ var talks = Object.create( null );
 //Get appropriate talk
 router.add( 'GET', /^\/talks\/([^\/]+)$/ ,
     function( request, response, title ) {
-        console.log("title is " + title);
         if ( title in talks ) respondJSON( response, 200, talks[ title ] );
         else respond( response, 404, 'No talk \'' + title + '\' found' );
     } );
@@ -126,15 +125,16 @@ router.add( 'GET', /^\/talks\/([^\/]+)$/ ,
 //Delete the talk
 router.add( 'DELETE', /^\/talks\/([^\/]+)$/ ,
     function( request, response, title ) {
-        //if ( title in talks ) {
-            //Remove from DB
-            //delete talks[ title ];
-            db.remove(title, registerChange);
-        //}
+        //Remove from session object
+        if ( title in talks ) {
+            delete talks[ title ];
+        }
+        //Remove from DB
+        db.remove(title, registerChange);
         respond( response, 204, null );
     });
 
-//Update the talks
+//Add the talk
 router.add( 'PUT', /^\/talks\/([^\/]+)$/,
     function( request, response, title ) {
         readStreamAsJSON( request, function( error, talk ) {
@@ -151,15 +151,16 @@ router.add( 'PUT', /^\/talks\/([^\/]+)$/,
                     summary: talk.summary,
                     comments: []
                 };
-                registerChange( title );
                 //add to DB
-                db.add(talks[ title ]);
-                respond( response, 204, null );
+                db.add(talks[ title ], function() {
+                    registerChange( title );
+                    respond( response, 204, null );
+                });
             }
         } );
     } );
 
-//Push the talk to the server
+//Add a comment to a talk
 router.add( 'POST', /^\/talks\/([^\/]+)\/comments$/,
     function( request, response, title ) {
         readStreamAsJSON( request, function( error, comment ) {
@@ -170,10 +171,13 @@ router.add( 'POST', /^\/talks\/([^\/]+)\/comments$/,
                     typeof comment.message != 'string' ) {
                 respond( response, 400, 'Bad comment data' );
             } else {
-                //talks[ title ].comments.push( comment );
+                talks[ title ].comments.push( comment );
                 //update with comment
-                db.update(title, comment, registerChange);
-                respond( response, 204, null );
+                db.update(title, comment, function() {
+                    registerChange( title );
+                    respond( response, 204, null );
+                });
+
             }
         } );
     } );
@@ -186,7 +190,18 @@ router.add("GET", /^\/talks$/, function(request, response) {
         for (var title in talks)
             list.push(talks[title]);
         //find all records and send them to a view for rendering
-        db.findAll(response, sendTalks);
+        //If app has already a session object - use it instead of DB call
+        if(list.length == 0) db.findAll(response, function(list, response) {
+
+            //Transform list from DB to an object
+            talks = list.reduce(function(obj, k) {
+                obj[k.title] = k;
+                return obj;
+            }, {});
+
+            sendTalks(list, response);
+        });
+
     } else {
         var since = Number(query.changesSince);
         if (isNaN(since)) {

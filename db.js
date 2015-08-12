@@ -11,18 +11,20 @@ var collection = monkdb.get("talks");
 
 var db = module.exports = function() {};
 
-db.prototype.add = function(data) {
+db.prototype.add = function(data, callback) {
     collection.insert(data, function(err, record) {
         if (err) throw err;
         console.log("Record added as " + record._id);
+        callback();
     });
 };
 
 db.prototype.update = function(title, data, callback) {
-    collection.update({"title": title}, { $set: {"comments": data}},
+
+    collection.update({"title": title}, { $push: {"comments": data}},
         function(err) {
         if (err) throw err;
-        callback(title);
+        callback();
     });
 };
 
@@ -33,10 +35,6 @@ db.prototype.close = function() {
 db.prototype.remove = function(title, callback) {
     collection.remove({title : title});
     callback(title);
-};
-
-db.prototype.find = function(data) {
-    //db
 };
 
 db.prototype.findAll = function(response, callback) {
