@@ -73,7 +73,7 @@ function drawTalk( talk ) {
         comments.appendChild( instantiateTemplate( 'comment', comment ) );
     } );
 
-    node.querySelector( 'button.del' ).addEventListener( 'click', deleteTalk.bind( null, talk.title ) );
+    node.querySelector( 'button.btn-danger' ).addEventListener( 'click', deleteTalk.bind( null, talk.title ) );
 
     var form = node.querySelector( 'form' );
     form.addEventListener( 'submit', function( event ) {
@@ -89,6 +89,7 @@ function talkUrl( title ) {
 }
 
 function deleteTalk( title ) {
+    console.log(title);
     request( {
         id: talkUrl( title ),
         pathname: talkUrl( title ),
@@ -113,7 +114,7 @@ function addComment( title, reqComment ) {
 //Always waits for changes
 function waitForChanges() {
     request( {
-            pathname: 'talks?changedSince=' + lastServerTime
+            pathname: 'talks?changesSince=' + lastServerTime
         },
         function( error, response ) {
             if ( error ) {

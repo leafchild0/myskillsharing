@@ -4,52 +4,51 @@
  * Time: 6:54 PM
  */
 
-var MongoClient = require('mongodb').MongoClient;
-var url = 'mongodb://localhost:27017/ssdb';
+var mongo = require('mongodb');
+var monk = require('monk');
+var monkdb =  monk('localhost:27017/ssdb');
+var collection = monkdb.get("talks");
 
-var db = module.exports = function() {
-    this.dBase = {};
-};
-
-MongoClient.connect(url, function(err, db) {
-    if (err) console.log("Something wrong with DB connection");
-    else {
-        console.log("Connected correctly to DB");
-        this.dBase = db;
-        dBase.collection = db.collection('talks');
-    }
-
-
-
-});
-
-db.prototype.closeCon = function() {
-    dBase.close();
-};
+var db = module.exports = function() {};
 
 db.prototype.add = function(data) {
-    dBase.collection.insert(data, function(err, records) {
+    collection.insert(data, function(err, record) {
         if (err) throw err;
-        console.log("Record added as " + records.ops[0]._id);
+        console.log("Record added as " + record._id);
     });
 };
 
-db.prototype.update = function(data) {
-    //db
+db.prototype.update = function(title, data, callback) {
+    collection.update({"title": title}, { $set: {"comments": data}},
+        function(err) {
+        if (err) throw err;
+        callback(title);
+    });
 };
 
-db.prototype.remove = function(data) {
-    //db
+db.prototype.close = function() {
+    monkdb.close();
+};
+
+db.prototype.remove = function(title, callback) {
+    collection.remove({title : title});
+    callback(title);
 };
 
 db.prototype.find = function(data) {
     //db
 };
 
-db.prototype.findAll = function() {
-    dBase.collection.find(data, function(err, records) {
+db.prototype.findAll = function(response, callback) {
+
+    var talks = [];
+
+    collection.find({}, function(err, records) {
         if (err) throw err;
-        return records;
+        else records.forEach(function(record) {
+            talks.push(record);
+
+        });
+        callback(talks, response);
     });
-    return "";
 };

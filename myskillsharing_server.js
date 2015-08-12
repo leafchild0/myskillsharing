@@ -118,6 +118,7 @@ var talks = Object.create( null );
 //Get appropriate talk
 router.add( 'GET', /^\/talks\/([^\/]+)$/ ,
     function( request, response, title ) {
+        console.log("title is " + title);
         if ( title in talks ) respondJSON( response, 200, talks[ title ] );
         else respond( response, 404, 'No talk \'' + title + '\' found' );
     } );
@@ -125,11 +126,11 @@ router.add( 'GET', /^\/talks\/([^\/]+)$/ ,
 //Delete the talk
 router.add( 'DELETE', /^\/talks\/([^\/]+)$/ ,
     function( request, response, title ) {
-        if ( title in talks ) {
+        //if ( title in talks ) {
             //Remove from DB
-            delete talks[ title ];
-            registerChange( title );
-        }
+            //delete talks[ title ];
+            db.remove(title, registerChange);
+        //}
         respond( response, 204, null );
     });
 
@@ -152,7 +153,7 @@ router.add( 'PUT', /^\/talks\/([^\/]+)$/,
                 };
                 registerChange( title );
                 //add to DB
-                //db.add(talks[ title ]);
+                db.add(talks[ title ]);
                 respond( response, 204, null );
             }
         } );
@@ -168,12 +169,11 @@ router.add( 'POST', /^\/talks\/([^\/]+)\/comments$/,
                     typeof comment.author != 'string' ||
                     typeof comment.message != 'string' ) {
                 respond( response, 400, 'Bad comment data' );
-            } else if ( title in talks ) {
-                talks[ title ].comments.push( comment );
-                registerChange( title );
-                respond( response, 204, null );
             } else {
-                respond( response, 404, 'No talk \'' + title + '\' found' );
+                //talks[ title ].comments.push( comment );
+                //update with comment
+                db.update(title, comment, registerChange);
+                respond( response, 204, null );
             }
         } );
     } );
@@ -185,7 +185,8 @@ router.add("GET", /^\/talks$/, function(request, response) {
         var list = [];
         for (var title in talks)
             list.push(talks[title]);
-        sendTalks(list, response);
+        //find all records and send them to a view for rendering
+        db.findAll(response, sendTalks);
     } else {
         var since = Number(query.changesSince);
         if (isNaN(since)) {
@@ -198,4 +199,5 @@ router.add("GET", /^\/talks$/, function(request, response) {
                 waitForChanges(since, response);
         }
     }
+    //db.close();
 });
