@@ -2,8 +2,15 @@
   "name": "myskillsharing",
   "version":"0.0.2",
   "main": "myskillsharing_server.js",
-  "description": "Skill-sharing website module from Eloquent JavaScript made by me",
+  "description": "Skill-sharing website module from Eloquent JavaScript book made by me",
   "dependencies": {"ecstatic": ">=0.5.0"},
   "licenses": [{"type": "MIT",
-                "url": "http://opensource.org/licenses/MIT"}]
+                "url": "http://opensource.org/licenses/MIT"}],
+  "maintainers":[
+    {"name": "Marijn Haverbeke",
+    "email": "marijnh@gmail.com",
+    "web": "http://marijnhaverbeke.nl"},
+    {"name": "Viktor Malyshev",
+      "email": "vmalyshev0@gmail.com",
+  ]
 }
